@@ -6,7 +6,7 @@
 
 # requirements
 * [**numpy**](https://www.numpy.org)
-* [**scipy**](https://www.scipy.org) (dependencies on scipy will be removed)
+* ~~[**scipy**](https://www.scipy.org) (dependencies on scipy will be removed)~~ removed
 
 # usage
 ```python
@@ -41,7 +41,7 @@ myObj.reconsctucedSignal # output after reconstruction
 # todo
 * add psychoacoustic
 * add quantization
-* remove scipy
+* ~~remove scipy~~
 
 ## License
 

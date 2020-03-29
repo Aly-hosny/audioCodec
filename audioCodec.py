@@ -1,6 +1,7 @@
 # from sound import *
 import numpy as np
-import scipy.io.wavfile as wav
+import wave
+import struct
 
 class codec:
     '''
@@ -14,20 +15,17 @@ class codec:
         :param alpha:    tonality index
         :param nSubband: number of filter bank subbands
         '''
-        self.wavFile = wavFile
-        self.samplingRate , self.frames = wav.read(wavFile) #get the sampling rate and the frames of the audio file
-        self.nFrames = len(self.frames)
+        self.wavFile = wave.open(wavFile, 'r')
+        self.samplingRate = self.wavFile.getframerate()
+        self.mode = 'stereo' if self.wavFile.getnchannels()==2 else 'mono'
+        pck = "<2h" if self.mode == 'stereo' else "<h"
+        self.nFrames = self.wavFile.getnframes()
+        self.frames =  np.array([struct.unpack(pck,self.wavFile.readframes(1)) for i in range(self.nFrames)])
         self.nSubband = nSubband
         self.outBin = outBin
         self.outWav = outWav
         self.alpha = alpha
 
-    @property
-    def mode(self):
-        '''
-        get the mode of the wav file "stereo or mono"
-        '''
-        return 'stereo' if len(self.frames.shape)==2 else 'mono'
 
     def applyAnalyzer(self):
         '''
