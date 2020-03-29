@@ -27,6 +27,16 @@ myObj.applySynthesiser() # apply synthesiser
 myObj.reconsctucedSignal # to get the output after reconstruction
 
 ```
+# attributes
+```python
+myObj.samplingRate # sampling rate of input file
+myObj.mode # input file mode "mono or stereo"
+myObj.frames # frames "samples" of input file
+myObj.nFrames # number of frames in input file
+myObj.filterLength # filter bank length
+myObj.filterBank # filter bank coefficients " impluse response"
+myObj.reconsctucedSignal # output after reconstruction
+```
 
 # todo
 * add psychoacoustic
