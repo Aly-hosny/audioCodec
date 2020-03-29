@@ -43,3 +43,6 @@ myObj.reconsctucedSignal # output after reconstruction
 * add quantization
 * remove scipy
 
+## License
+
+This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License, which allows for personal and research use only. For a commercial license please contact the authors. You can view a license summary here: http://creativecommons.org/licenses/by-nc/4.0/
