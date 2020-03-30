@@ -4,6 +4,11 @@
 # model
 ![Model](drawing.svg "Model")
 
+# MDCT
+ MDCT: "modulated filter" is described by following function
+![mdct](mdct.png "mdct")
+
+
 # requirements
 * [**numpy**](https://www.numpy.org)
 * ~~[**scipy**](https://www.scipy.org) (dependencies on scipy will be removed)~~ removed
@@ -39,6 +44,7 @@ myObj.reconsctucedSignal # output after reconstruction
 ```
 
 # todo
+* add low latency filter banks
 * add psychoacoustic
 * add quantization
 * ~~remove scipy~~
