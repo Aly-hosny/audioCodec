@@ -15,10 +15,10 @@ class codec:
         :param alpha:    tonality index
         :param nSubband: number of filter bank subbands
         '''
-        self.wavFile = wave.open(wavFile, 'r')
-        self.samplingRate = self.wavFile.getframerate()
-        self.nChannels = self.wavFile.getnchannels()
-        self.nFrames = self.wavFile.getnframes()
+        self.wavFile = wave.open(wavFile, 'r') 
+        self.samplingRate = self.wavFile.getframerate() # get frame rate
+        self.nChannels = self.wavFile.getnchannels() # get number of channels (1,2)
+        self.nFrames = self.wavFile.getnframes() # get number of frames
         self.width = self.wavFile.getsampwidth()
         data=self.wavFile.readframes(self.nFrames) # temp storage for frames
         self.frames =  np.array(struct.unpack('h' *(self.nFrames*self.width) ,data)).reshape(-1,self.nChannels) # get the audio frames 
