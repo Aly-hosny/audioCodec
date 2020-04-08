@@ -17,10 +17,11 @@ class codec:
         '''
         self.wavFile = wave.open(wavFile, 'r')
         self.samplingRate = self.wavFile.getframerate()
-        self.mode = 'stereo' if self.wavFile.getnchannels()==2 else 'mono'
-        pck = "<2h" if self.mode == 'stereo' else "<h"
+        self.nChannels = self.wavFile.getnchannels()
         self.nFrames = self.wavFile.getnframes()
-        self.frames =  np.array([struct.unpack(pck,self.wavFile.readframes(1)) for i in range(self.nFrames)])
+        self.width = self.wavFile.getsampwidth()
+        data=self.wavFile.readframes(self.nFrames) # temp storage for frames
+        self.frames =  np.array(struct.unpack('h' *(self.nFrames*self.width) ,data)).reshape(-1,self.nChannels) # get the audio frames 
         self.nSubband = nSubband
         self.outBin = outBin
         self.outWav = outWav
@@ -42,9 +43,9 @@ class codec:
         self.filterBank = np.einsum('i,ji->ji',temp2 , temp1) # filter coefficients
 
         # applying filter bank to audio input signal
-        if self.mode == 'mono':
+        if self.nChannels == 1:
             self.analyzedFrames = np.array([np.convolve(i,self.frames)[0:self.nFrames][::self.nSubband] for i in self.filterBank  ]) # appltyin MDCT and downsampling the output
-        elif self.mode == 'stereo':
+        elif self.nChannels == 2:
             Y0 = np.array([np.convolve(i,self.frames[:,0])[0:self.nFrames][::self.nSubband] for i in self.filterBank  ]) # appltyin MDCT and downsampling the output for the 1st channel
             Y1 = np.array([np.convolve(i,self.frames[:,1])[0:self.nFrames][::self.nSubband] for i in self.filterBank  ]) # appltyin MDCT and downsampling the output for the 2nd channel
             self.analyzedFrames = np.array([Y0,Y1])
@@ -57,14 +58,14 @@ class codec:
         '''
         G = np.flip(self.filterBank,1) # the impulse response of the receiver filter bank the just the flipping the trasmitter filter bank
 
-        if self.mode == 'mono':
+        if self.nChannels == 1:
             # upsampling
             Y_upsampled = np.zeros((self.analyzedFrames.shape[0],self.analyzedFrames.shape[1]*self.nSubband))
             Y_upsampled[:,::self.nSubband] = self.analyzedFrames 
             x_tilde = np.array([np.convolve(i,j)[0:self.nFrames] for i,j in zip(G,Y_upsampled)  ]) # applyin inverse-MDCT
             self.reconsctucedSignal = np.sum(x_tilde, axis=0)  # Perfectly reconstructed signal
 
-        elif self.mode == 'stereo':
+        elif self.nChannels == 2:
             # upsampling 2 channels
             Y_upsampled = np.zeros((2,self.analyzedFrames.shape[1],self.analyzedFrames.shape[2]*self.nSubband))
             Y_upsampled[0][:,::self.nSubband] = self.analyzedFrames[0]
