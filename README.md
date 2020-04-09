@@ -23,13 +23,17 @@ outWav = 'reconstructed.wav' # wav file name for reconstricted signal
 alpha=1. # tonality index
 nSubband=256 # number of filter bank subbands "taps"
 
-myObj = codec(wavFile,outBin,outWav,alpha,nSubband)
+myObj = codec(wavFile,alpha,nSubband)
 
 myObj.applyAnalyzer() # apply analyzer
-# myObj.analyzedFrame will get you can get the analyzed signal 
+# myObj.analyzedFrame # get the analyzed signal 
+
+myObj.binaryWrite(outBin) # write analyzed frames into a  binary file
 
 myObj.applySynthesiser() # apply synthesiser
-myObj.reconsctucedSignal # to get the output after reconstruction
+
+myObj.wavWrite(outWav) # write synthesised frames into a wav file
+
 
 ```
 # attributes
@@ -40,7 +44,9 @@ myObj.frames # frames "samples" of input file
 myObj.nFrames # number of frames in input file
 myObj.filterLength # filter bank length
 myObj.filterBank # filter bank coefficients " impluse response"
+myObj.analyzedFrame # get the analyzed signal 
 myObj.reconsctucedSignal # output after reconstruction
+
 ```
 
 # todo

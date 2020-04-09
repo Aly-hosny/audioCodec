@@ -2,12 +2,13 @@
 import numpy as np
 import wave
 import struct
+import pickle
 
 class codec:
     '''
     A class to encode and decode wav file using filter banks and psycoacoustic models
     '''
-    def __init__(self,wavFile,outBin,outWav,alpha=1.,nSubband=256):
+    def __init__(self,wavFile,alpha=1.,nSubband=256):
         '''
         :param wavfile:  input wav file
         :param outBin:   output binary file
@@ -23,15 +24,15 @@ class codec:
         data=self.wavFile.readframes(self.nFrames) # temp storage for frames
         self.frames =  np.array(struct.unpack('h' *(self.nFrames*self.width) ,data)).reshape(-1,self.nChannels) # get the audio frames 
         self.nSubband = nSubband
-        self.outBin = outBin
-        self.outWav = outWav
         self.alpha = alpha
-
+        self._analyzed = False
+        self._synthesised = False
 
     def applyAnalyzer(self):
         '''
         Filter bank analyzer part in transmitter
         '''
+        
         self.filterLength=2*self.nSubband #filter bank length "length of each filter tap"
         n= np.arange(self.filterLength)
         k=np.arange(self.nSubband)
@@ -49,6 +50,7 @@ class codec:
             Y0 = np.array([np.convolve(i,self.frames[:,0])[0:self.nFrames][::self.nSubband] for i in self.filterBank  ]) # appltyin MDCT and downsampling the output for the 1st channel
             Y1 = np.array([np.convolve(i,self.frames[:,1])[0:self.nFrames][::self.nSubband] for i in self.filterBank  ]) # appltyin MDCT and downsampling the output for the 2nd channel
             self.analyzedFrames = np.array([Y0,Y1])
+        self._analyzed = True
         
 
 
@@ -56,6 +58,9 @@ class codec:
         '''
         Filter bank synthesiser part in receiver
         '''
+        if not self._analyzed:
+            raise RuntimeError("Signal must be analyezed before synthesised")
+        self._synthesised = True
         G = np.flip(self.filterBank,1) # the impulse response of the receiver filter bank the just the flipping the trasmitter filter bank
 
         if self.nChannels == 1:
@@ -75,3 +80,24 @@ class codec:
             x_tilde1 = np.array([np.convolve(i,j)[0:self.nFrames] for i,j in zip(G,Y_upsampled[1])  ]) # applyin inverse-MDCT
             x_tilde1 = np.sum(x_tilde1,axis=0) # Perfectly reconstructed ch2
             self.reconsctucedSignal = np.array([x_tilde0,x_tilde1]).T  # Perfectly reconstructed signal
+        self._synthesised = True
+
+    def binaryWrite(self,outBin):
+        if not self._analyzed:
+            raise RuntimeError('Signal must be analyzed first')
+        binFile = open(outBin, 'wb')
+        pickle.dump(self.analyzedFrames,binFile ) 
+        binFile.close()
+
+    def wavWrite(self,outWav):
+        if not self._synthesised:
+            raise RuntimeError('Signal must be synthesised to be saved in wav file')
+        snd = self.reconsctucedSignal.flatten().astype(int)
+        length=len(snd)
+        wf = wave.open(outWav, 'wb')
+        wf.setnchannels(self.nChannels)
+        wf.setsampwidth(self.width)
+        wf.setframerate(self.samplingRate)
+        data=struct.pack( 'h' * length, *snd )
+        wf.writeframes(data)
+        wf.close()
