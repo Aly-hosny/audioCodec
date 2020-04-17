@@ -26,9 +26,15 @@ nSubband=256 # number of filter bank subbands "taps"
 myObj = codec(wavFile,alpha,nSubband)
 
 myObj.applyAnalyzer() # apply analyzer
-# myObj.analyzedFrame # get the analyzed signal 
 
 myObj.binaryWrite(outBin) # write analyzed frames into a  binary file
+
+myObj.applyPsychoacoustic() # apply psychoacoustic analysis on the signal to get the quantization steps
+
+myObj.quantize() # quantize the signal with quantization steps from psychoacoustic analysis
+
+myObj.dequantize() # dequantize the signal using quantization steps recovered from the scaleFactors
+#Scale factors are the representation of the quantization steps in Bark domain, I used them as the are lower and make more sense to transmit them instead of the whole quantization matrix.
 
 myObj.applySynthesiser() # apply synthesiser
 
@@ -51,9 +57,11 @@ myObj.reconsctucedSignal # output after reconstruction
 
 # todo
 * add low latency filter banks
-* add psychoacoustic
-* add quantization
+* ~~add psychoacoustic~~
+* ~~add quantization~~
 * ~~remove scipy~~
+* redo the stereo/mono part with a better approach
+* add jupyter notebook with better explanation
 
 ## License
 
